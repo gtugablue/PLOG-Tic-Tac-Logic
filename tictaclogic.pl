@@ -10,31 +10,40 @@
 cross(1).
 circle(2).
 
-tictaclogic(B, S) :-
-        M is S mod 2,
-        M = 0, % Size must be even
+tictaclogic(B, Width, Height) :-
+        Mw is Width mod 2,
+        Mw = 0, % Width must be even
+        Mh is Height mod 2,
+        Mh = 0, % Height must be even
         cross(X),
         circle(O),
         %board(B, S, S),
-        test_board(B, 6),
+        test_board(B, Width, Height),
         transpose(B, B1),
         list_board_vars(B, L),
         domain(L, 1, 2),
         % Restrictions
+        Nw is Width div 2,
+        Nh is Height div 2,
+        S is Width * Height,
         N is S div 2,
-        S2 is S * S,
-        N2 is S2 div 2,
-        global_cardinality(L, [X-N2, O-N2]),
+        global_cardinality(L, [X-N, O-N]),
         no_more_than_two_consecutive(B),
         no_more_than_two_consecutive(B1),
-        same_number(B, N, X, O),
-        same_number(B1, N, X, O),
-        %all_different_lists(B),
-        %all_different_lists(B1),
+        same_number(B, Nw, X, O),
+        same_number(B1, Nh, X, O),
+        all_different_lists(B),
+        all_different_lists(B1),
         % Labeling
         labeling([], L),
         fd_statistics('backtracks', V), write(V), nl,
-        print_board(B).
+        print_board(B), nl, write(B), nl.
+
+exactly(_, [], 0).
+exactly(X, [Y|L], N) :-
+         X #= Y #<=> B,
+         N #= M+B,
+         exactly(X, L, M).
 
 same_number([], _, _, _).
 same_number([H | T], N, X, O) :-
@@ -61,7 +70,7 @@ board([H | T], Width, Height) :-
         Height1 is Height - 1,
         board(T, Width, Height1).
 
-test_board(B, 6) :-
+test_board2(B, 6, 6) :-
         cross(X),
         circle(O),
         B = [[_, _, X, _, _, _],
@@ -70,6 +79,42 @@ test_board(B, 6) :-
              [_, _, O, _, _, _],
              [_, X, _, _, _, X],
              [O, _, _, _, O, _]].
+
+test_board(B, 6, 6) :-
+        cross(X),
+        circle(O),
+        B = [[_, _, _, _, _, _],
+             [X, _, _, _, _, X],
+             [_, _, _, X, _, _],
+             [O, _, _, X, _, _],
+             [_, O, _, _, _, _],
+             [_, O, _, _, X, _]].
+
+test_board(B, 8, 8) :-
+        cross(X),
+        circle(O),
+        B = [[_, _, _, X, _, X, _, _],
+             [_, X, _, _, _, _, _, _],
+             [_, _, _, _, X, X, _, X],
+             [_, _, O, _, _, _, O, _],
+             [X, _, _, _, X, _, _, _],
+             [_, _, _, O, _, _, X, X],
+             [_, X, _, _, _, _, _, _],
+             [_, _, O, _, _, _, O, _]].
+
+test_board(B, 10, 10) :-
+        cross(X),
+        circle(O),
+        B = [[_, _, X, _, _, _, _, X, _, _],
+             [_, _, _, _, _, _, _, X, X, _],
+             [_, O, _, _, _, _, _, _, _, _],
+             [_, _, _, _, _, _, O, _, O, _],
+             [_, O, X, _, _, _, _, _, _, O],
+             [_, _, _, _, _, _, _, _, _, _],
+             [_, _, _, _, O, _, _, X, _, _],
+             [_, _, _, _, _, X, X, _, _, X],
+             [_, O, _, _, _, _, _, _, O, _],
+             [O, O, _, _, O, _, _, _, _, _]].
 
 list_board_vars([], []).
 list_board_vars([Bh | Bt], L) :-
