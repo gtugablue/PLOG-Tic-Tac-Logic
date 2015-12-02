@@ -11,6 +11,10 @@ cross(1).
 circle(2).
 
 tictaclogic(B, Width, Height) :-
+        solver(B, Width, Height),
+        print_board(B).
+
+solver(B, Width, Height) :-
         Mw is Width mod 2,
         Mw = 0, % Width must be even
         Mh is Height mod 2,
@@ -28,16 +32,15 @@ tictaclogic(B, Width, Height) :-
         S is Width * Height,
         N is S div 2,
         global_cardinality(L, [X-N, O-N]),
-        no_more_than_two_consecutive(B),
-        no_more_than_two_consecutive(B1),
+        no_more_than_two_consecutive(B, X, O),
+        no_more_than_two_consecutive(B1, X, O),
         same_number(B, Nw, X, O),
         same_number(B1, Nh, X, O),
         all_different_lists(B),
         all_different_lists(B1),
         % Labeling
         labeling([], L),
-        fd_statistics('backtracks', V), write(V), nl,
-        print_board(B), nl, write(B), nl.
+        fd_statistics.
 
 exactly(_, [], 0).
 exactly(X, [Y|L], N) :-
@@ -69,6 +72,30 @@ board([H | T], Width, Height) :-
         length(H, Width),
         Height1 is Height - 1,
         board(T, Width, Height1).
+
+list_board_vars([], []).
+list_board_vars([Bh | Bt], L) :-
+        append(Bh, L1, L),
+        list_board_vars(Bt, L1).
+
+no_more_than_two_consecutive([], _, _).
+no_more_than_two_consecutive([H | T], X, O) :-
+        no_more_than_two_consecutive_aux(H, Bs1, X),
+        no_more_than_two_consecutive_aux(H, Bs2, O),
+        sum(Bs1, #=<, 1),
+        sum(Bs2, #=<, 1),
+        no_more_than_two_consecutive(T, X, O).
+no_more_than_two_consecutive_aux([_], [], _).
+no_more_than_two_consecutive_aux([H, H1 | T], [B | Bs], P) :-
+        (H #= P #/\ H1 #= P) #<=> B,
+        no_more_than_two_consecutive_aux([H1 | T], Bs, P).
+
+%sel([H | T], H, T).
+%sel(Vars, Selected, Rest) :- random_select(Selected, Vars, Rest), var(Selected).
+%sel(Vars,Selected,Rest):- length(Vars, N), random(0, N, R), R1 is R+1, element(R1, Vars, Selected), var(Selected), list_delete(Vars, R, Rest).
+
+list_delete([_X|L1],0, L1).
+list_delete([X|L1], I, [X|L2]):- I > 0, I1 is I - 1, list_delete(L1, I1, L2).
 
 test_board2(B, 6, 6) :-
         cross(X),
@@ -115,31 +142,3 @@ test_board(B, 10, 10) :-
              [_, _, _, _, _, X, X, _, _, X],
              [_, O, _, _, _, _, _, _, O, _],
              [O, O, _, _, O, _, _, _, _, _]].
-
-list_board_vars([], []).
-list_board_vars([Bh | Bt], L) :-
-        append(Bh, L1, L),
-        list_board_vars(Bt, L1).
-
-no_more_than_two_consecutive([]).
-no_more_than_two_consecutive([H | T]) :-
-        no_more_than_two_consecutive_aux(H),
-        no_more_than_two_consecutive(T).
-no_more_than_two_consecutive_aux([_]).
-no_more_than_two_consecutive_aux([H, H1 | T]) :-
-        H #\= H1,
-        no_more_than_two_consecutive_aux([H1 | T]).
-no_more_than_two_consecutive_aux([H, H1 | T]) :-
-        H #= H1,
-        no_more_than_two_consecutive_aux2([H1 | T]).
-no_more_than_two_consecutive_aux2([_]).
-no_more_than_two_consecutive_aux2([H, H1 | T]) :-
-        H #\= H1,
-        no_more_than_two_consecutive_aux([H1 | T]).
-
-%sel([H | T], H, T).
-%sel(Vars, Selected, Rest) :- random_select(Selected, Vars, Rest), var(Selected).
-%sel(Vars,Selected,Rest):- length(Vars, N), random(0, N, R), R1 is R+1, element(R1, Vars, Selected), var(Selected), list_delete(Vars, R, Rest).
-
-list_delete([_X|L1],0, L1).
-list_delete([X|L1], I, [X|L2]):- I > 0, I1 is I - 1, list_delete(L1, I1, L2).
