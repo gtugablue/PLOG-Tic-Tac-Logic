@@ -21,11 +21,12 @@ solver(B, Width, Height) :-
         Mh = 0, % Height must be even
         cross(X),
         circle(O),
-        %board(B, S, S),
+        %board(B, Width, Height),
         test_board(B, Width, Height),
         transpose(B, B1),
         list_board_vars(B, L),
         domain(L, 1, 2),
+        
         % Restrictions
         Nw is Width div 2,
         Nh is Height div 2,
@@ -38,9 +39,9 @@ solver(B, Width, Height) :-
         same_number(B1, Nh, X, O),
         all_different_lists(B),
         all_different_lists(B1),
+        
         % Labeling
-        labeling([], L),
-        fd_statistics.
+        labeling([], L).
 
 exactly(_, [], 0).
 exactly(X, [Y|L], N) :-

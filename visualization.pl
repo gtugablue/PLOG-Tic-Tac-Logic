@@ -8,9 +8,9 @@ print_board([Line]) :-
         print_line(Line),
         length(Line, Size),
         print_separating_line(Size).
-print_board([Line|Rest]) :-
-        print_line(Line),
-        print_board(Rest).
+print_board([Line1, Line2 |Rest]) :-
+        print_line(Line1),
+        print_board([Line2 | Rest]).
 print_board([]).
 
 print_line(Line) :-
@@ -19,7 +19,7 @@ print_line(Line) :-
         print_line_cells(Line).
 
 print_separating_line(Size) :-
-        Size > 0,
+        Size > 0, !,
         print_separating_line_aux,
         S1 is Size - 1,
         print_separating_line(S1).
