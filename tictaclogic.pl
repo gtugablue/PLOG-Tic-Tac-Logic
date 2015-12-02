@@ -21,6 +21,9 @@ tictaclogic(B, S) :-
         domain(L, 1, 2),
         % Restrictions
         N is S div 2,
+        S2 is S * S,
+        N2 is S2 div 2,
+        global_cardinality(L, [X-N2, O-N2]),
         same_number(B, N, X, O),
         same_number(B1, N, X, O),
         all_different_lists(B),
@@ -43,10 +46,10 @@ all_different_lists(L, [H | T]) :-
         different_lists(L, H),
         all_different_lists(L, T).
 
+different_lists([L1h | _], [L2h | _]) :- L1h #\= L2h.
 different_lists([L1h | L1t], [L2h | L2t]) :-
         L1h #= L2h,
         different_lists(L1t, L2t).
-different_lists([L1h | _], [L2h | _]) :- L1h #\= L2h.
 
 board([], _, 0) :- !.
 board([H | T], Width, Height) :-
@@ -58,6 +61,9 @@ test_board(B, 3) :-
         B = [[0, 0, 0],
              [0, 0, 0],
              [0, 0, 0]].
+
+teste(1).
+teste(2).
 
 list_board_vars([], []).
 list_board_vars([Bh | Bt], L) :-
