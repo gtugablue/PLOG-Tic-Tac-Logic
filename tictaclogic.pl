@@ -33,8 +33,8 @@ solver(B, Width, Height) :-
         S is Width * Height,
         N is S div 2,
         global_cardinality(L, [X-N, O-N]),
-        no_more_than_two_consecutive(B, X, O),
-        no_more_than_two_consecutive(B1, X, O),
+        no_more_than_two_consecutive(B),
+        no_more_than_two_consecutive(B1),
         same_number(B, Nw, X, O),
         same_number(B1, Nh, X, O),
         all_different_lists(B),
@@ -79,17 +79,14 @@ list_board_vars([Bh | Bt], L) :-
         append(Bh, L1, L),
         list_board_vars(Bt, L1).
 
-no_more_than_two_consecutive([], _, _).
-no_more_than_two_consecutive([H | T], X, O) :-
-        no_more_than_two_consecutive_aux(H, Bs1, X),
-        no_more_than_two_consecutive_aux(H, Bs2, O),
-        sum(Bs1, #=<, 1),
-        sum(Bs2, #=<, 1),
-        no_more_than_two_consecutive(T, X, O).
-no_more_than_two_consecutive_aux([_], [], _).
-no_more_than_two_consecutive_aux([H, H1 | T], [B | Bs], P) :-
-        (H #= P #/\ H1 #= P) #<=> B,
-        no_more_than_two_consecutive_aux([H1 | T], Bs, P).
+no_more_than_two_consecutive([]).
+no_more_than_two_consecutive([H | T]) :-
+        no_more_than_two_consecutive_aux(H),
+        no_more_than_two_consecutive(T).
+no_more_than_two_consecutive_aux([_, _]).
+no_more_than_two_consecutive_aux([H, H2, H3 | T]) :-
+        H #\= H2 #\/ H #\= H3,
+        no_more_than_two_consecutive_aux([H2, H3 | T]).
 
 %sel([H | T], H, T).
 %sel(Vars, Selected, Rest) :- random_select(Selected, Vars, Rest), var(Selected).
@@ -98,7 +95,7 @@ no_more_than_two_consecutive_aux([H, H1 | T], [B | Bs], P) :-
 list_delete([_X|L1],0, L1).
 list_delete([X|L1], I, [X|L2]):- I > 0, I1 is I - 1, list_delete(L1, I1, L2).
 
-test_board2(B, 6, 6) :-
+test_board(B, 6, 6) :-
         cross(X),
         circle(O),
         B = [[_, _, X, _, _, _],
@@ -108,7 +105,7 @@ test_board2(B, 6, 6) :-
              [_, X, _, _, _, X],
              [O, _, _, _, O, _]].
 
-test_board(B, 6, 6) :-
+test_board2(B, 6, 6) :-
         cross(X),
         circle(O),
         B = [[_, _, _, _, _, _],
