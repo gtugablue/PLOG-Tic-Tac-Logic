@@ -12,7 +12,8 @@ circle(2).
 
 tictaclogic(B, Width, Height) :-
         solver(B, Width, Height),
-        print_board(B).
+        %findall(Board, solver(Board, Width, Height), B),
+        write(B).
 
 solver(B, Width, Height) :-
         Mw is Width mod 2,
@@ -30,9 +31,6 @@ solver(B, Width, Height) :-
         % Restrictions
         Nw is Width div 2,
         Nh is Height div 2,
-        S is Width * Height,
-        N is S div 2,
-        global_cardinality(L, [X-N, O-N]),
         no_more_than_two_consecutive(B),
         no_more_than_two_consecutive(B1),
         same_number(B, Nw, X, O),
