@@ -10,10 +10,10 @@
 cross(1).
 circle(2).
 
-tictaclogic(B, Width, Height) :-
+tictaclogic(Width, Height) :-
         solver(B, Width, Height),
         %findall(Board, solver(Board, Width, Height), B),
-        write(B).
+        print_board(B).
 
 solver(B, Width, Height) :-
         Mw is Width mod 2,
@@ -22,8 +22,8 @@ solver(B, Width, Height) :-
         Mh = 0, % Height must be even
         cross(X),
         circle(O),
-        %board(B, Width, Height),
-        test_board(B, Width, Height),
+        board(B, Width, Height),
+        %test_board(B, Width, Height),
         transpose(B, B1),
         list_board_vars(B, L),
         domain(L, 1, 2),
@@ -58,13 +58,14 @@ all_different_lists([H | T]) :-
         all_different_lists(T).
 all_different_lists(_, []).
 all_different_lists(L, [H | T]) :-
-        different_lists(L, H),
+        different_lists(L, H, Bs),
+        sum(Bs, #\= , 0),
         all_different_lists(L, T).
 
-different_lists([L1h | _], [L2h | _]) :- L1h #\= L2h.
-different_lists([L1h | L1t], [L2h | L2t]) :-
-        L1h #= L2h,
-        different_lists(L1t, L2t).
+different_lists([], [], []).
+different_lists([L1h | L1t], [L2h | L2t], [B | Bs]) :-
+        (L1h #\= L2h) #<=> B,
+        different_lists(L1t, L2t, Bs).
 
 board([], _, 0) :- !.
 board([H | T], Width, Height) :-
@@ -129,12 +130,12 @@ test_board(B, 10, 10) :-
         cross(X),
         circle(O),
         B = [[_, _, X, _, _, _, _, X, _, _],
-             [_, _, _, _, _, _, _, X, X, _],
+             [_, _, _, _, _, _, _, _, X, _],
              [_, O, _, _, _, _, _, _, _, _],
              [_, _, _, _, _, _, O, _, O, _],
-             [_, O, X, _, _, _, _, _, _, O],
+             [_, O, X, _, _, _, _, _, _, _],
              [_, _, _, _, _, _, _, _, _, _],
-             [_, _, _, _, O, _, _, X, _, _],
-             [_, _, _, _, _, X, X, _, _, X],
-             [_, O, _, _, _, _, _, _, O, _],
-             [O, O, _, _, O, _, _, _, _, _]].
+             [_, _, _, _, O, _, _, _, _, _],
+             [_, _, _, _, _, _, _, _, _, _],
+             [_, _, _, _, _, _, _, _, _, _],
+             [_, _, _, _, O, _, _, _, _, _]].
