@@ -11,41 +11,45 @@ cross(1).
 circle(2).
 
 tictaclogic(Width, Height) :-
-        solver(B, Width, Height),
-        %findall(Board, solver(Board, Width, Height), B),
-        print_board(B).
-
-solver(B, Width, Height) :-
         Mw is Width mod 2,
         Mw = 0, % Width must be even
         Mh is Height mod 2,
         Mh = 0, % Height must be even
-        cross(X),
-        circle(O),
-        board(B, Width, Height),
-        %test_board(B, Width, Height),
-        transpose(B, B1),
+        solver(B1, Width, Height, []),
+        write('First solution: '), nl, print_board(B1).
+
+%replace(+N, +X, +L1, -L2)
+% Replaces the Nth member of L1 by X and instanciates L2 to the result.
+replace(N, X, L1, L2) :-
+        length(L3, N),
+        append(L3, [_ | T], L1),
+        append(L3, [X | T], L2).
+
+board_clear_piece(Board, [X, Y], New_board) :-
+        nth0(Y, Board, Line),
+        replace(X, _, Line, New_line),
+        replace(Y, New_line, Board, New_board).
+
+solver(B, Width, Height, LabelingParams) :-
+        empty_board(B, Width, Height),
         list_board_vars(B, L),
         domain(L, 1, 2),
         
         % Restrictions
         Nw is Width div 2,
         Nh is Height div 2,
+        transpose(B, B1),
+        cross(X),
+        circle(O),
         no_more_than_two_consecutive(B),
         no_more_than_two_consecutive(B1),
         same_number(B, Nw, X, O),
         same_number(B1, Nh, X, O),
         all_different_lists(B),
         all_different_lists(B1),
-        
-        % Labeling
-        labeling([], L).
 
-exactly(_, [], 0).
-exactly(X, [Y|L], N) :-
-         X #= Y #<=> B,
-         N #= M+B,
-         exactly(X, L, M).
+        % Labeling
+        labeling(LabelingParams, L).
 
 same_number([], _, _, _).
 same_number([H | T], N, X, O) :-
@@ -59,7 +63,7 @@ all_different_lists([H | T]) :-
 all_different_lists(_, []).
 all_different_lists(L, [H | T]) :-
         different_lists(L, H, Bs),
-        sum(Bs, #\= , 0),
+        sum(Bs, #\=, 0),
         all_different_lists(L, T).
 
 different_lists([], [], []).
@@ -67,11 +71,11 @@ different_lists([L1h | L1t], [L2h | L2t], [B | Bs]) :-
         (L1h #\= L2h) #<=> B,
         different_lists(L1t, L2t, Bs).
 
-board([], _, 0) :- !.
-board([H | T], Width, Height) :-
+empty_board([], _, 0) :- !.
+empty_board([H | T], Width, Height) :-
         length(H, Width),
         Height1 is Height - 1,
-        board(T, Width, Height1).
+        empty_board(T, Width, Height1).
 
 list_board_vars([], []).
 list_board_vars([Bh | Bt], L) :-
@@ -88,11 +92,7 @@ no_more_than_two_consecutive_aux([H, H2, H3 | T]) :-
         no_more_than_two_consecutive_aux([H2, H3 | T]).
 
 %sel([H | T], H, T).
-%sel(Vars, Selected, Rest) :- random_select(Selected, Vars, Rest), var(Selected).
-%sel(Vars,Selected,Rest):- length(Vars, N), random(0, N, R), R1 is R+1, element(R1, Vars, Selected), var(Selected), list_delete(Vars, R, Rest).
-
-list_delete([_X|L1],0, L1).
-list_delete([X|L1], I, [X|L2]):- I > 0, I1 is I - 1, list_delete(L1, I1, L2).
+sel(Vars, Selected, Rest) :- random_select(Selected, Vars, Rest), var(Selected).
 
 test_board(B, 6, 6) :-
         cross(X),
