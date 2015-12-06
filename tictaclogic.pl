@@ -15,6 +15,7 @@ tictaclogic(Width, Height) :-
         Mw = 0, % Width must be even
         Mh is Height mod 2,
         Mh = 0, % Height must be even
+        write('Generating board...'), nl,
         generate_board(B, Width, Height),
         write('Board to be solved: '), nl, print_board(B), nl,
         solver(B, Width, Height, []),
