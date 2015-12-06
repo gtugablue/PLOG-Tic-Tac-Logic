@@ -15,8 +15,37 @@ tictaclogic(Width, Height) :-
         Mw = 0, % Width must be even
         Mh is Height mod 2,
         Mh = 0, % Height must be even
-        solver(B1, Width, Height, []),
-        write('First solution: '), nl, print_board(B1).
+        generate_board(B, Width, Height),
+        write('Board to be solved: '), nl, print_board(B), nl,
+        solver(B, Width, Height, []),
+        write('Solution: '), nl, print_board(B).
+
+generate_board(B, Width, Height) :-
+        solver(B1, Width, Height, [variable(sel)]),
+        board_remove_pieces(B1, Width, Height, B).
+
+board_remove_pieces(B, Width, Height, Result) :-
+        print_board(B),
+        board_nonempty_coords(B, Width, Height, NonEmpty),
+        random_select(Coords, NonEmpty, Rest),
+        board_remove_piece(B, Coords, B1),
+        board_copy(B1, B2),
+        findall(B2, solver(B2, Width, Height, []), L),
+        board_remove_pieces_aux(B, B1, L, Width, Height, Rest, Result).
+board_remove_pieces_aux(_, B1, L, Width, Height, _, Result) :-
+        length(L, 1), !,
+        board_remove_pieces(B1, Width, Height, Result).
+board_remove_pieces_aux(B, _, _, _, _, [], B) :- !.
+board_remove_pieces_aux(B, _, _, Width, Height, NonEmpty, Result) :-
+        random_select(Coords, NonEmpty, Rest),
+        board_remove_piece(B, Coords, B1),
+        board_copy(B1, B2),
+        findall(B2, solver(B2, Width, Height, []), L),
+        board_remove_pieces_aux_aux(B, B1, L, Width, Height, Rest, Result).
+board_remove_pieces_aux_aux(_, B1, L, Width, Height, _, Result) :-
+        length(L, 1), !,
+        board_remove_pieces(B1, Width, Height, Result).
+board_remove_pieces_aux_aux(B, B1, L, Width, Height, [_ | T], Result) :- board_remove_pieces_aux(B, B1, L, Width, Height, T, Result).
 
 %replace(+N, +X, +L1, -L2)
 % Replaces the Nth member of L1 by X and instanciates L2 to the result.
@@ -24,8 +53,46 @@ replace(N, X, L1, L2) :-
         length(L3, N),
         append(L3, [_ | T], L1),
         append(L3, [X | T], L2).
+              
+board_xy(Board, [X, Y], Cell) :-
+        nth0(Y, Board, Line),
+        nth0(X, Line, Cell).
 
-board_clear_piece(Board, [X, Y], New_board) :-
+board_copy([], []) :- !.
+board_copy([H1 | T1], [H2 | T2]) :-
+        board_copy_aux(H1, H2),
+        board_copy(T1, T2).
+board_copy_aux([], []) :- !.
+board_copy_aux([H1 | T1], [_ | T2]) :-
+        var(H1), !,
+        board_copy_aux(T1, T2).
+board_copy_aux([H1 | T1], [H1 | T2]) :- board_copy_aux(T1, T2).
+
+board_nonempty_coords(Board, Width, Height, NonEmpty) :- board_nonempty_coords_aux(Board, NonEmpty, Width, Height, [0, 0]).
+board_nonempty_coords_aux([], _, _, Height, [0, Height]).
+board_nonempty_coords_aux([Bh | Bt], NonEmpty, Width, Height, [0, Y]) :-
+        board_nonempty_coords_aux_aux(Bh, NonEmpty1, Width, Height, [0, Y]),
+        append(NonEmpty1, NonEmpty2, NonEmpty),
+        Y1 is Y + 1,
+        board_nonempty_coords_aux(Bt, NonEmpty2, Width, Height, [0, Y1]).
+board_nonempty_coords_aux_aux([], [], Width, _, [Width, _]) :- !.
+board_nonempty_coords_aux_aux([Rh | Rt], [[X, Y] | Et], Width, Height, [X, Y]) :-
+        nonvar(Rh), !,
+        X1 is X + 1,
+        board_nonempty_coords_aux_aux(Rt, Et, Width, Height, [X1, Y]).
+board_nonempty_coords_aux_aux([_ | Rt], NonEmpty, Width, Height, [X, Y]) :-
+        X1 is X + 1,
+        board_nonempty_coords_aux_aux(Rt, NonEmpty, Width, Height, [X1, Y]).
+
+board_random_coords(Width, Height, [X, Y]) :-
+        Total_size is Width * Height,
+        random(0, Total_size, R),
+        Div is R div Width,
+        Mod is R mod Width,
+        X = Div,
+        Y = Mod.
+
+board_remove_piece(Board, [X, Y], New_board) :-
         nth0(Y, Board, Line),
         replace(X, _, Line, New_line),
         replace(Y, New_line, Board, New_board).
