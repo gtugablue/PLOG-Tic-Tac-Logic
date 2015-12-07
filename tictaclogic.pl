@@ -20,13 +20,13 @@ tictaclogic(Width, Height) :-
         generate_board(B, Width, Height),
         statistics(walltime, [GenTime|_]),
         Delta1 is GenTime - InitTime,
-        write('Board generated in '), write_time(Delta1), nl,
         write('Board to be solved: '), nl, print_board(B), nl,
+        write('Board generated in '), write_time(Delta1), nl, nl,
         solver(B, Width, Height, []),
         statistics(walltime, [SolveTime|_]),
         write('Solution: '), nl, print_board(B),
         Delta2 is SolveTime-GenTime,
-        write('Board solved in '), write_time(Delta2), nl.
+        nl, write('Board solved in '), write_time(Delta2), nl, nl.
 
 generate_board(B, Width, Height) :-
         solver(B1, Width, Height, [variable(sel)]),
