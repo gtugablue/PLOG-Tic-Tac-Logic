@@ -37,3 +37,9 @@ print_line_cells([]) :- write('|'), nl.
 print_cell(Cell) :-
         piece_to_ascii(Cell, P),
         write(' '), write(P), write(' ').
+
+write_time(T) :- T > 1000,
+        S is T/1000,
+        write(S), write('s').
+write_time(T) :- write(T), write('ms').
+          
