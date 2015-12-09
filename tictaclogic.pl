@@ -17,10 +17,18 @@ tictaclogic(Width, Height, BoardGenerator) :-
         Mh = 0, % Height must be even
         write('Generating board...'), nl,
         G =.. [BoardGenerator, B, Width, Height],
+        statistics(walltime, [InitTime|_]),
         G,
+        statistics(walltime, [GenTime|_]),
+        Delta1 is GenTime - InitTime,
         write('Board to be solved: '), nl, print_board(B), nl,
-        solver(B, Width, Height, [min]),
-        write('Solution: '), nl, print_board(B).
+        write('Board generated in '), write_time(Delta1), nl, nl,
+        statistics(walltime, [InitTime2|_]),
+        solver(B, Width, Height, []),
+        statistics(walltime, [SolveTime|_]),
+        write('Solution: '), nl, print_board(B),
+        Delta2 is SolveTime-InitTime2,
+        nl, write('Board solved in '), write_time(Delta2), nl, nl.
 
 generate_board_fast(B, Width, Height) :-
         solver(B1, Width, Height, [variable(sel)]),
