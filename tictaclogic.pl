@@ -34,17 +34,14 @@ generate_board_fast(B, Width, Height) :-
         solver(B1, Width, Height, [variable(sel)]),
         Size is Width * Height,
         N is Size - (Size div 10),
-        generate_board_fast_aux(B1, B, Width, Height, N).
-generate_board_fast_aux(B, B, _, _, 0) :- !.
-generate_board_fast_aux(B, NewBoard, Width, Height, N) :-
-        board_random_coords(Width, Height, Coords),
-        board_xy(B, Coords, Cell),
-        nonvar(Cell), !,
+        board_nonempty_coords(B1, Width, Height, NonEmpty),
+        generate_board_fast_aux(B1, B, Width, Height, NonEmpty, _, N).
+generate_board_fast_aux(B, B, _, _, _, _, 0) :- !.
+generate_board_fast_aux(B, NewBoard, Width, Height, NonEmpty, NonEmptyNew, N) :-
+        random_select(Coords, NonEmpty, NonEmpty1),
         board_remove_piece(B, Coords, B1),
-        board_xy(B, Coords, Cell),
         N1 is N - 1,
-        generate_board_fast_aux(B1, NewBoard, Width, Height, N1).
-generate_board_fast_aux(B, NewBoard, Width, Height, N) :- generate_board_fast_aux(B, NewBoard, Width, Height, N).
+        generate_board_fast_aux(B1, NewBoard, Width, Height, NonEmpty1, NonEmptyNew, N1).
 
 generate_board_slow(B, Width, Height) :-
         solver(B1, Width, Height, [variable(sel)]),
