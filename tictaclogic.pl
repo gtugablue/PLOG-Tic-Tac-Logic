@@ -10,18 +10,35 @@
 cross(1).
 circle(2).
 
-tictaclogic(Width, Height) :-
+tictaclogic(Width, Height, BoardGenerator) :-
         Mw is Width mod 2,
         Mw = 0, % Width must be even
         Mh is Height mod 2,
         Mh = 0, % Height must be even
         write('Generating board...'), nl,
-        generate_board(B, Width, Height),
+        G =.. [BoardGenerator, B, Width, Height],
+        G,
         write('Board to be solved: '), nl, print_board(B), nl,
-        solver(B, Width, Height, []),
+        solver(B, Width, Height, [min]),
         write('Solution: '), nl, print_board(B).
 
-generate_board(B, Width, Height) :-
+generate_board_fast(B, Width, Height) :-
+        solver(B1, Width, Height, [variable(sel)]),
+        Size is Width * Height,
+        N is Size - (Size div 10),
+        generate_board_fast_aux(B1, B, Width, Height, N).
+generate_board_fast_aux(B, B, _, _, 0) :- !.
+generate_board_fast_aux(B, NewBoard, Width, Height, N) :-
+        board_random_coords(Width, Height, Coords),
+        board_xy(B, Coords, Cell),
+        nonvar(Cell), !,
+        board_remove_piece(B, Coords, B1),
+        board_xy(B, Coords, Cell),
+        N1 is N - 1,
+        generate_board_fast_aux(B1, NewBoard, Width, Height, N1).
+generate_board_fast_aux(B, NewBoard, Width, Height, N) :- generate_board_fast_aux(B, NewBoard, Width, Height, N).
+
+generate_board_slow(B, Width, Height) :-
         solver(B1, Width, Height, [variable(sel)]),
         board_remove_pieces(B1, Width, Height, B).
 
@@ -115,7 +132,7 @@ solver(B, Width, Height, LabelingParams) :-
         same_number(B1, Nh, X, O),
         all_different_lists(B),
         all_different_lists(B1),
-
+        
         % Labeling
         labeling(LabelingParams, L).
 
