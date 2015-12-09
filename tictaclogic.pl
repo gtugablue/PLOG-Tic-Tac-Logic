@@ -31,9 +31,9 @@ tictaclogic(Width, Height, BoardGenerator) :-
         nl, write('Board solved in '), write_time(Delta2), nl, nl.
 
 generate_board_fast(B, Width, Height) :-
-        solver(B1, Width, Height, [variable(sel)]),
+        solver(B1, Width, Height, [variable(sel), enum]),
         Size is Width * Height,
-        N is Size - (Size div 10),
+        N is Size - (Size div 7),
         board_nonempty_coords(B1, Width, Height, NonEmpty),
         generate_board_fast_aux(B1, B, Width, Height, NonEmpty, _, N).
 generate_board_fast_aux(B, B, _, _, _, _, 0) :- !.
