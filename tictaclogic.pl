@@ -10,93 +10,23 @@
 cross(1).
 circle(2).
 
-testing :-
-        write('8'), nl, nl,
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        tictaclogic(8, 8, generate_board_fast),
-        write('10'), nl, nl,
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        tictaclogic(10, 10, generate_board_fast),
-        write('12'), nl, nl,
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        tictaclogic(12, 12, generate_board_fast),
-        write('14'), nl, nl,
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        tictaclogic(14, 14, generate_board_fast),
-        write('16'), nl, nl,
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        tictaclogic(16, 16, generate_board_fast),
-        write('18'), nl, nl,
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        tictaclogic(18, 18, generate_board_fast),
-        write("DONE").
-        
-
-tictaclogic(Width, Height, _) :-
-        %Mw is Width mod 2,
-        %Mw = 0, % Width must be even
-        %Mh is Height mod 2,
-        %Mh = 0, % Height must be even
-        %write('Generating board...'), nl,
-        %G =.. [BoardGenerator, B, Width, Height],
-        %statistics(walltime, [InitTime|_]),
-        %G,
-        %statistics(walltime, [GenTime|_]),
-        %Delta1 is GenTime - InitTime,
-        %write('Board to be solved: '), nl, print_board(B), nl,
-        %write('Board generated in '), write_time(Delta1), nl,
+tictaclogic(Width, Height, BoardGenerator) :-
+        Mw is Width mod 2,
+        Mw = 0, % Width must be even
+        Mh is Height mod 2,
+        Mh = 0, % Height must be even
+        write('Generating board...'), nl,
+        G =.. [BoardGenerator, B, Width, Height],
+        statistics(walltime, [InitTime|_]),
+        G,
+        statistics(walltime, [GenTime|_]),
+        Delta1 is GenTime - InitTime,
+        write('Board to be solved: '), nl, print_board(B), nl,
+        write('Board generated in '), write_time(Delta1), nl,
         statistics(walltime, [InitTime2|_]),
-        solver(_, Width, Height, [enum]),
+        solver(B, Width, Height, [enum]),
         statistics(walltime, [SolveTime|_]),
-        %write('Solution: '), nl, print_board(B),
+        write('Solution: '), nl, print_board(B),
         Delta2 is SolveTime-InitTime2,
         write('Board solved in '), write_time(Delta2), nl.
 
@@ -108,6 +38,7 @@ generate_board_fast(B, Width, Height) :-
         generate_board_fast_aux(B1, B, Width, Height, NonEmpty, _, N).
 generate_board_fast_aux(B, B, _, _, _, _, 0) :- !.
 generate_board_fast_aux(B, NewBoard, Width, Height, NonEmpty, NonEmptyNew, N) :-
+        print_board(B),
         random_select(Coords, NonEmpty, NonEmpty1),
         board_remove_piece(B, Coords, B1),
         N1 is N - 1,
@@ -118,7 +49,7 @@ generate_board_slow(B, Width, Height) :-
         board_remove_pieces(B1, Width, Height, B).
 
 board_remove_pieces(B, Width, Height, Result) :-
-        %print_board(B),
+        print_board(B),
         board_nonempty_coords(B, Width, Height, NonEmpty),
         random_select(Coords, NonEmpty, Rest),
         board_remove_piece(B, Coords, B1),
@@ -251,18 +182,7 @@ no_more_than_two_consecutive_aux([H, H2, H3 | T]) :-
         H #\= H2 #\/ H #\= H3,
         no_more_than_two_consecutive_aux([H2, H3 | T]).
 
-%sel([H | T], H, T).
 sel(Vars, Selected, Rest) :- random_select(Selected, Vars, Rest), var(Selected).
-
-test_board(B, 6, 6) :-
-        cross(X),
-        circle(O),
-        B = [[_, _, X, _, _, _],
-             [_, _, X, _, _, _],
-             [X, _, _, _, _, X],
-             [_, _, O, _, _, _],
-             [_, X, _, _, _, X],
-             [O, _, _, _, O, _]].
 
 test_board2(B, 6, 6) :-
         cross(X),
@@ -273,6 +193,16 @@ test_board2(B, 6, 6) :-
              [O, _, _, X, _, _],
              [_, O, _, _, _, _],
              [_, O, _, _, X, _]].
+
+test_board(B, 6, 6) :-
+        cross(X),
+        circle(O),
+        B = [[_, _, X, _, _, _],
+             [_, _, X, _, _, _],
+             [X, _, _, _, _, X],
+             [_, _, O, _, _, _],
+             [_, X, _, _, _, X],
+             [O, _, _, _, O, _]].
 
 test_board(B, 8, 8) :-
         cross(X),
