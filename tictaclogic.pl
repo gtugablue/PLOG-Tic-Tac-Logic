@@ -63,7 +63,7 @@ board_remove_pieces_aux(B, _, _, Width, Height, NonEmpty, Result) :-
         random_select(Coords, NonEmpty, Rest),
         board_remove_piece(B, Coords, B1),
         board_copy(B1, B2),
-        findall(B2, solver(B2, Width, Height, []), L),
+        findall(B2, solver(B2, Width, Height, [enum]), L),
         board_remove_pieces_aux_aux(B, B1, L, Width, Height, Rest, Result).
 board_remove_pieces_aux_aux(_, B1, L, Width, Height, _, Result) :-
         length(L, 1), !,
